@@ -5,17 +5,17 @@ import { RouteProp } from '@react-navigation/native'
 import RootStackParamList from '../types/navigation'
 
 type Props = {
-  route: RouteProp<RootStackParamList, 'Upsert'>
+  route: RouteProp<RootStackParamList, 'Settings'>
 }
 
-const Upsert = ({ route }: Props) => {
+const Settings = ({ route }: Props) => {
   return (
     <Layout route={route}>
-      <Text>Upsert</Text>
+      <Text>Settings</Text>
     </Layout>
   )
 }
 
-export default Upsert
+export default Settings
 
 const styles = StyleSheet.create({})
