@@ -1,8 +1,9 @@
-import { StyleSheet, Text } from 'react-native'
+import { StyleSheet } from 'react-native'
+import { RouteProp } from '@react-navigation/native'
 
 import Layout from '../layouts/Main'
-import { RouteProp } from '@react-navigation/native'
 import RootStackParamList from '../types/navigation'
+import UpsertForm from '../components/UpsertForm'
 
 type Props = {
   route: RouteProp<RootStackParamList, 'Upsert'>
@@ -11,7 +12,7 @@ type Props = {
 const Upsert = ({ route }: Props) => {
   return (
     <Layout route={route}>
-      <Text>Upsert</Text>
+      <UpsertForm />
     </Layout>
   )
 }
