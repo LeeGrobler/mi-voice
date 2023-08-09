@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { Alert, Image, StyleSheet, View } from 'react-native'
-import { Button, TextInput } from 'react-native-paper'
+import { Alert, Image, Pressable, StyleSheet, View } from 'react-native'
+import { Button, MD3Theme, Surface, Text, TextInput } from 'react-native-paper'
 import * as ImagePicker from 'expo-image-picker'
 import { Audio } from 'expo-av'
 import { Recording } from 'expo-av/build/Audio'
 import { Ionicons } from '@expo/vector-icons'
+import { useTheme } from 'react-native-paper'
+import GlobalStyles from '../assets/styles/global'
 
 type Props = {}
 
@@ -24,6 +26,7 @@ type PreviewState = {
 }
 
 const UpsertForm = ({}: Props) => {
+  const theme = useTheme()
   const [recording, setRecording] = useState<Recording>()
   const [preview, setPreview] = useState<PreviewState>()
   const [form, setForm] = useState<Form>({
@@ -31,6 +34,8 @@ const UpsertForm = ({}: Props) => {
     image: null,
     sound: undefined,
   })
+
+  const styles = makeStyles(theme)
 
   const takePhoto = async () => {
     const permissions = await ImagePicker.requestCameraPermissionsAsync()
@@ -48,6 +53,8 @@ const UpsertForm = ({}: Props) => {
     const result = await ImagePicker.launchImageLibraryAsync()
     if (!result.canceled) setForm(v => ({ ...v, image: result.assets![0].uri }))
   }
+
+  const resetImage = () => setForm(v => ({ ...v, image: null }))
 
   const startRecording = async () => {
     try {
@@ -136,36 +143,53 @@ const UpsertForm = ({}: Props) => {
   }
 
   return (
-    <View>
+    <View style={styles.container}>
       <TextInput
-        label="Label"
+        label="Phase Label"
         mode="outlined"
         value={form.label}
         onChangeText={label => setForm(v => ({ ...v, label }))}
       />
 
-      <View style={styles.controls}>
-        <Button onPress={takePhoto} mode="elevated" style={styles.button}>
-          Photo
-        </Button>
+      <Surface
+        style={[styles.imageSurface, !form.image && GlobalStyles.pa8]}
+        elevation={0}
+      >
+        <Text
+          style={[styles.title, !!form.image && GlobalStyles.ml8]}
+          variant="titleMedium"
+        >
+          Phrase Image {form.image && '(tap to change)'}
+        </Text>
 
-        <Button onPress={pickImage} mode="elevated" style={styles.button}>
-          Image
-        </Button>
-      </View>
+        {!form.image ? (
+          <>
+            <Button onPress={takePhoto} mode="elevated" style={styles.button}>
+              Take a Photo
+            </Button>
 
-      {form.image && (
-        <View style={styles.preview}>
-          <Image style={styles.image} source={{ uri: form.image }} />
-        </View>
-      )}
+            <Text style={styles.textDivider} variant="titleMedium">
+              OR
+            </Text>
+
+            <Button onPress={pickImage} mode="elevated" style={styles.button}>
+              Upload an Image
+            </Button>
+          </>
+        ) : (
+          <>
+            <Pressable style={styles.imagePreview} onPress={resetImage}>
+              <Image style={styles.image} source={{ uri: form.image }} />
+            </Pressable>
+          </>
+        )}
+      </Surface>
 
       {form.sound ? (
         <View style={styles.controls}>
           <Button
             onPress={preview ? pausePreview : playPreview}
             mode="elevated"
-            style={styles.button}
           >
             {preview?.status &&
               `${preview.status.position} / ${preview.status.duration} | `}
@@ -185,7 +209,12 @@ const UpsertForm = ({}: Props) => {
         </Button>
       )}
 
-      <Button onPress={submit} mode="elevated">
+      <Button
+        onPress={submit}
+        mode="elevated"
+        buttonColor={theme.colors.primary}
+        textColor="white"
+      >
         Create Word
       </Button>
     </View>
@@ -194,29 +223,50 @@ const UpsertForm = ({}: Props) => {
 
 export default UpsertForm
 
-const styles = StyleSheet.create({
-  controls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 16,
-  },
+const makeStyles = (theme: MD3Theme) =>
+  StyleSheet.create({
+    container: {
+      gap: 16,
+    },
 
-  button: {
-    flex: 1,
-  },
+    imageSurface: {
+      gap: 8,
+      borderRadius: 8,
+      backgroundColor: theme.colors.primaryContainer,
+      paddingTop: 8,
+    },
 
-  preview: {
-    width: '100%',
-    height: 200,
-    marginVertical: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
+    title: {
+      marginBottom: 8,
+    },
 
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-})
+    textDivider: {
+      textAlign: 'center',
+    },
+
+    imagePreview: {
+      width: '100%',
+      height: 200,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 4,
+      overflow: 'hidden',
+    },
+
+    image: {
+      width: '100%',
+      height: '100%',
+    },
+
+    closeButton: {
+      position: 'absolute',
+      margin: 8,
+      top: 0,
+      right: 0,
+      backgroundColor: theme.colors.errorContainer,
+    },
+
+    controls: {},
+
+    button: {},
+  })
